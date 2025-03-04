@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Project Planner</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary: #7209b7;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --success: #38b000;
+      --warning: #ffaa00;
+      --danger: #d00000;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .planner-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 20px;
+      position: relative;
+    }
+
+    .card-header h2 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    .card-header p {
+      opacity: 0.9;
+    }
+
+    .card-body {
+      padding: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #444;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    textarea.form-control {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background-color: #e9ecef;
+      color: #495057;
+    }
+
+    .btn-secondary:hover {
+      background-color: #dde1e3;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+
+    .team-member {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .team-member .remove-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      color: var(--danger);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .team-member-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .member-icon {
+      width: 36px;
+      height: 36px;
+      background-color: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+    }
+
+    .result-section {
+      margin-top: 40px;
+    }
+
+    .result-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .result-header {
+      background: linear-gradient(135deg, var(--success), var(--primary));
+      color: white;
+      padding: 20px;
+    }
+
+    .result-body {
+      padding: 25px;
+    }
+
+    .result-content {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      white-space: pre-wrap;
+      font-family: 'Consolas', 'Monaco', monospace;
+      line-height: 1.6;
+      color: #333;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 5px;
+    }
+
+    .skill-tag {
+      display: inline-block;
+      background-color: rgba(67, 97, 238, 0.1);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 16px;
+      font-size: 0.8rem;
+    }
+
+    .skills-container {
+      position: relative;
+    }
+
+    #skillSuggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 10;
+      box-shadow: var(--shadow);
+      display: none;
+    }
+
+    .skill-suggestion {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .skill-suggestion:hover {
+      background-color: #f0f2f5;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .loading i {
+      font-size: 2rem;
+      color: var(--primary);
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .team-members-container {
+      margin-bottom: 20px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .card-header, .card-body {
+        padding: 15px;
+      }
+      
+      .btn {
+        padding: 10px 16px;
+      }
+    }
+    :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #90b8f8;
+            --background-color: #f5f7fa;
+            --chat-bg: #ffffff;
+            --text-color: #333333;
+            --bot-msg-bg: #e6f2ff;
+            --user-msg-bg: #f1f1f1;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .chat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            align-self: flex-end;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .chat-icon:hover {
+            transform: scale(1.05);
+            background-color: var(--secondary-color);
+        }
+
+        .chat-icon i {
+            font-size: 24px;
+        }
+
+        .chat-window {
+            width: 350px;
+            height: 500px;
+            background-color: var(--chat-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            display: none;
+            flex-direction: column;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .chat-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chat-header .close-btn {
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+
+        .chat-header .close-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 15px;
+            border-radius: 18px;
+            position: relative;
+            margin-bottom: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            animation: fadeIn 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: var(--bot-msg-bg);
+            border-top-left-radius: 5px;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--user-msg-bg);
+            border-top-right-radius: 5px;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background-color: var(--bot-msg-bg);
+            padding: 12px 15px;
+            border-radius: 18px;
+            border-top-left-radius: 5px;
+            animation: pulse 1s infinite;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background-color: var(--secondary-color);
+            display: inline-block;
+            border-radius: 50%;
+            margin-right: 5px;
+            opacity: 0.7;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation: bounce 1s infinite 0.1s;
+        }
+        .typing-indicator span:nth-child(2) {
+            animation: bounce 1s infinite 0.3s;
+        }
+        .typing-indicator span:nth-child(3) {
+            animation: bounce 1s infinite 0.5s;
+            margin-right: 0;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .timestamp {
+            font-size: 10px;
+            color: #888;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .chat-footer {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .send-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        .send-btn i {
+            font-size: 18px;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 0 15px;
+        }
+
+        .suggestion-chip {
+            background-color: #f0f5ff;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--accent-color);
+        }
+
+        .suggestion-chip:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Notification badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 22px;
+            height: 22px;
+            background-color: #ff5252;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .notification-badge.show {
+            opacity: 1;
+        }
+
+        /* Animation for new message notification */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(0.95); }
+        }
+
+        .chat-icon.new-message {
+            animation: pulse-ring 2s infinite;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .chat-window {
+                width: 90vw;
+                height: 70vh;
+                position: fixed;
+                bottom: 80px;
+                right: 5vw;
+            }
+        }
+  </style>
+</head>
+<body>
+
+  <div class="chatbot-container">
+    <div class="chat-window">
+        <div class="chat-header">
+            <h3>Project Planner Assistant</h3>
+            <div class="close-btn">×</div>
+        </div>
+        <div class="chat-body">
+            <!-- Messages will appear here -->
+        </div>
+        <div class="suggestions">
+            <!-- Suggestion chips will appear here -->
+        </div>
+        <div class="chat-footer">
+            <input type="text" class="chat-input" placeholder="Ask me anything about your project...">
+            <button class="send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+    <div class="chat-icon">
+        <div class="notification-badge">1</div>
+        <i class="fas fa-comment-dots"></i>
+    </div>
+</div> 
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-robot"></i> AI Project Planner</h1>
+      <p>Generate comprehensive AI project plans based on your team and requirements</p>
+    </header>
+
+    <div class="planner-card">
+      <div class="card-header">
+        <h2>Project Details</h2>
+        <p>Fill out the information below to generate your AI project plan</p>
+      </div>
+      <div class="card-body">
+        <form id="plannerForm" method="POST">
+          <div class="form-group">
+            <label for="problem_statement">
+              <i class="fas fa-lightbulb"></i> Problem Statement
+            </label>
+            <textarea 
+              class="form-control" 
+              id="problem_statement" 
+              name="problem_statement" 
+              placeholder="Describe the problem your AI project aims to solve..."
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="deadline">
+              <i class="fas fa-calendar-alt"></i> Project Deadline
+            </label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="deadline" 
+              name="deadline" 
+              placeholder="e.g., 12 weeks, 3 months, etc."
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="team_size">
+              <i class="fas fa-users"></i> Number of Team Members
+            </label>
+            <input 
+              type="number" 
+              class="form-control" 
+              id="team_size" 
+              name="team_size" 
+              min="1" 
+              max="20"
+              value="1"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>
+              <i class="fas fa-user-friends"></i> Team Members & Skills
+            </label>
+            <div id="team_members_container" class="team-members-container">
+              <!-- Initial team member -->
+              <div class="team-member" id="member_1">
+                <div class="team-member-header">
+                  <div class="member-icon">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <h3>Team Member 1</h3>
+                </div>
+                <div class="form-group">
+                  <label for="name_1">Name</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="name_1" 
+                    name="name_1" 
+                    placeholder="Enter team member's name"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="skills_1">Skills (comma-separated)</label>
+                  <div class="skills-container">
+                    <input 
+                      type="text" 
+                      class="form-control skills-input" 
+                      id="skills_1" 
+                      name="skills_1" 
+                      placeholder="e.g., Python, Machine Learning, Data Analysis"
+                      required
+                    />
+                    <div id="skillSuggestions_1" class="skill-suggestions"></div>
+                  </div>
+                  <div class="skill-tags" id="skill_tags_1"></div>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" id="addMemberBtn" class="btn btn-secondary">
+              <i class="fas fa-plus"></i> Add Team Member
+            </button>
+          </div>
+
+          <div class="action-buttons">
+            <button type="submit" class="btn btn-primary btn-block">
+              <i class="fas fa-cogs"></i> Generate Project Plan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="loading" id="loadingIndicator">
+      <i class="fas fa-spinner"></i>
+      <p>Generating your AI project plan...</p>
+    </div>
+
+    {% if project_plan %}
+    <div class="result-section">
+      <div class="result-card">
+        <div class="result-header">
+          <h2><i class="fas fa-clipboard-check"></i> Your AI Project Plan</h2>
+          <p>Based on your team's skills and project requirements</p>
+        </div>
+        <div class="result-body">
+          <div class="result-content">{{ project_plan }}</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    // Common AI/ML skills for suggestions
+    const commonSkills = [
+      "Python", "R", "Java", "JavaScript", "C++", "SQL", "NoSQL",
+      "Machine Learning", "Deep Learning", "Neural Networks", "NLP",
+      "Computer Vision", "Reinforcement Learning", "Data Analysis",
+      "Data Visualization", "Statistics", "Mathematics",
+      "TensorFlow", "PyTorch", "Keras", "scikit-learn",
+      "AWS", "Azure", "Google Cloud", "Docker", "Kubernetes",
+      "Git", "CI/CD", "MLOps", "Project Management", "Agile",
+      "Data Engineering", "ETL", "Big Data", "Hadoop", "Spark",
+      "Cloud Computing", "Distributed Systems", "DevOps"
+    ];
+
+    // Track the current number of team members
+    let memberCount = 1;
+
+    // Function to add new team member fields
+    function addTeamMember() {
+      memberCount++;
+      
+      const membersContainer = document.getElementById("team_members_container");
+      
+      // Create new team member container
+      const memberDiv = document.createElement("div");
+      memberDiv.className = "team-member";
+      memberDiv.id = `member_${memberCount}`;
+      
+      // Create member header
+      const headerDiv = document.createElement("div");
+      headerDiv.className = "team-member-header";
+      
+      const iconDiv = document.createElement("div");
+      iconDiv.className = "member-icon";
+      iconDiv.innerHTML = '<i class="fas fa-user"></i>';
+      
+      const title = document.createElement("h3");
+      title.textContent = `Team Member ${memberCount}`;
+      
+      headerDiv.appendChild(iconDiv);
+      headerDiv.appendChild(title);
+      
+      // Create remove button
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "remove-btn";
+      removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+      removeBtn.onclick = function() {
+        removeMember(memberCount);
+      };
+      
+      // Create name input
+      const nameGroup = document.createElement("div");
+      nameGroup.className = "form-group";
+      
+      const nameLabel = document.createElement("label");
+      nameLabel.setAttribute("for", `name_${memberCount}`);
+      nameLabel.textContent = "Name";
+      
+      const nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.className = "form-control";
+      nameInput.id = `name_${memberCount}`;
+      nameInput.name = `name_${memberCount}`;
+      nameInput.placeholder = "Enter team member's name";
+      nameInput.required = true;
+      
+      nameGroup.appendChild(nameLabel);
+      nameGroup.appendChild(nameInput);
+      
+      // Create skills input
+      const skillsGroup = document.createElement("div");
+      skillsGroup.className = "form-group";
+      
+      const skillsLabel = document.createElement("label");
+      skillsLabel.setAttribute("for", `skills_${memberCount}`);
+      skillsLabel.textContent = "Skills (comma-separated)";
+      
+      const skillsContainer = document.createElement("div");
+      skillsContainer.className = "skills-container";
+      
+      const skillsInput = document.createElement("input");
+      skillsInput.type = "text";
+      skillsInput.className = "form-control skills-input";
+      skillsInput.id = `skills_${memberCount}`;
+      skillsInput.name = `skills_${memberCount}`;
+      skillsInput.placeholder = "e.g., Python, Machine Learning, Data Analysis";
+      skillsInput.required = true;
+      
+      const suggestionsDiv = document.createElement("div");
+      suggestionsDiv.id = `skillSuggestions_${memberCount}`;
+      suggestionsDiv.className = "skill-suggestions";
+      
+      skillsContainer.appendChild(skillsInput);
+      skillsContainer.appendChild(suggestionsDiv);
+      
+      const skillTagsDiv = document.createElement("div");
+      skillTagsDiv.className = "skill-tags";
+      skillTagsDiv.id = `skill_tags_${memberCount}`;
+      
+      skillsGroup.appendChild(skillsLabel);
+      skillsGroup.appendChild(skillsContainer);
+      skillsGroup.appendChild(skillTagsDiv);
+      
+      // Assemble the member div
+      memberDiv.appendChild(headerDiv);
+      memberDiv.appendChild(removeBtn);
+      memberDiv.appendChild(nameGroup);
+      memberDiv.appendChild(skillsGroup);
+      
+      // Add to the container
+      membersContainer.appendChild(memberDiv);
+      
+      // Set up skill input event listeners for the new member
+      setupSkillInputListeners(memberCount);
+    }
+    
+    // Function to remove a team member
+    function removeMember(id) {
+      const memberToRemove = document.getElementById(`member_${id}`);
+      if (memberToRemove) {
+        memberToRemove.remove();
+      }
+    }
+    
+    // Function to set up skill input event listeners
+    function setupSkillInputListeners(id) {
+      const skillsInput = document.getElementById(`skills_${id}`);
+      const suggestionsDiv = document.getElementById(`skillSuggestions_${id}`);
+      const tagsDiv = document.getElementById(`skill_tags_${id}`);
+      
+      skillsInput.addEventListener("input", function() {
+        const input = this.value.trim();
+        
+        if (input) {
+          // Check if we need to show suggestions
+          const lastValue = input.split(",").pop().trim().toLowerCase();
+          
+          if (lastValue.length > 0) {
+            // Filter skills that match what the user is typing
+            const matches = commonSkills.filter(skill => 
+              skill.toLowerCase().startsWith(lastValue)
+            );
+            
+            if (matches.length > 0) {
+              suggestionsDiv.innerHTML = "";
+              matches.forEach(skill => {
+                const div = document.createElement("div");
+                div.className = "skill-suggestion";
+                div.textContent = skill;
+                div.onclick = function() {
+                  addSkill(id, skill);
+                };
+                suggestionsDiv.appendChild(div);
+              });
+              suggestionsDiv.style.display = "block";
+            } else {
+              suggestionsDiv.style.display = "none";
+            }
+          } else {
+            suggestionsDiv.style.display = "none";
+          }
+        } else {
+          suggestionsDiv.style.display = "none";
+        }
+      });
+      
+      // Close suggestions when clicking outside
+      document.addEventListener("click", function(e) {
+        if (e.target !== skillsInput) {
+          suggestionsDiv.style.display = "none";
+        }
+      });
+      
+      // Update tags when input changes
+      skillsInput.addEventListener("blur", function() {
+        updateSkillTags(id);
+      });
+      
+      // Also update on comma or enter key
+      skillsInput.addEventListener("keydown", function(e) {
+        if (e.key === "," || e.key === "Enter") {
+          if (e.key === "Enter") e.preventDefault();
+          updateSkillTags(id);
+        }
+      });
+    }
+    
+    // Function to add a skill from suggestions
+    function addSkill(id, skill) {
+      const skillsInput = document.getElementById(`skills_${id}`);
+      const suggestionsDiv = document.getElementById(`skillSuggestions_${id}`);
+      
+      const currentValue = skillsInput.value.trim();
+      const parts = currentValue.split(",");
+      
+      // Replace the last part with the selected skill
+      parts.pop();
+      parts.push(skill);
+      
+      skillsInput.value = parts.join(", ") + ", ";
+      suggestionsDiv.style.display = "none";
+      skillsInput.focus();
+      
+      updateSkillTags(id);
+    }
+    
+    // Function to update skill tags display
+    function updateSkillTags(id) {
+      const skillsInput = document.getElementById(`skills_${id}`);
+      const tagsDiv = document.getElementById(`skill_tags_${id}`);
+      
+      const skills = skillsInput.value
+        .split(",")
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+      
+      tagsDiv.innerHTML = "";
+      
+      skills.forEach(skill => {
+        const tag = document.createElement("span");
+        tag.className = "skill-tag";
+        tag.textContent = skill;
+        tagsDiv.appendChild(tag);
+      });
+    }
+    
+    // Function to show loading indicator
+    function showLoading() {
+      document.getElementById("loadingIndicator").style.display = "block";
+    }
+
+    // Setup event listeners when the page loads
+    document.addEventListener("DOMContentLoaded", function() {
+      // Set up "Add Team Member" button
+      document.getElementById("addMemberBtn").addEventListener("click", addTeamMember);
+      
+      // Set up form submission with loading indicator
+      document.getElementById("plannerForm").addEventListener("submit", function() {
+        showLoading();
+      });
+      
+      // Set up skill input listeners for the initial team member
+      setupSkillInputListeners(1);
+    });
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // DOM Elements
+      const chatIcon = document.querySelector('.chat-icon');
+      const chatWindow = document.querySelector('.chat-window');
+      const closeBtn = document.querySelector('.close-btn');
+      const chatBody = document.querySelector('.chat-body');
+      const chatInput = document.querySelector('.chat-input');
+      const sendBtn = document.querySelector('.send-btn');
+      const suggestionsContainer = document.querySelector('.suggestions');
+      const notificationBadge = document.querySelector('.notification-badge');
+
+      // Knowledge base for the project planner bot
+      const knowledgeBase = {
+          "greeting": [
+              "Hello! I'm your Project Planner Assistant. How can I help you today?",
+              "Welcome! I can help you plan your project, answer questions about this website, or provide guidance on project management."
+          ],
+          "project_planning": [
+              "Planning a project involves defining goals, timeline, resources, and deliverables. What type of project are you planning?",
+              "Good project planning requires clear objectives, a realistic schedule, and appropriate resources. Would you like guidance on any specific planning aspect?"
+          ],
+          "timeline": [
+              "Creating a timeline involves identifying key tasks, determining their duration, and setting dependencies. Do you need help structuring your project timeline?",
+              "Effective timelines include milestones, deadlines, and buffer time for unexpected delays. How can I help with your project timeline?"
+          ],
+          "resources": [
+              "Resource planning includes identifying required personnel, tools, materials, and budget. What resources do you need help planning?",
+              "Effective resource allocation ensures your project has what it needs when needed. Would you like tips on resource management?"
+          ],
+          "budget": [
+              "Project budgeting involves estimating costs for resources, labor, materials, and contingencies. Need help with budget planning?",
+              "A good budget accounts for all project expenses with some buffer for unexpected costs. I can provide guidance on creating a realistic budget."
+          ],
+          "risks": [
+              "Risk management involves identifying potential issues, assessing their impact, and developing mitigation strategies. Would you like help with risk assessment?",
+              "Proactive risk management helps prevent project delays and failures. I can help you identify common risks for your project type."
+          ],
+          "team": [
+              "Team planning involves defining roles, responsibilities, and communication protocols. Do you need assistance with team structure?",
+              "Effective teams have clear roles and good communication. I can help you plan your team composition and collaboration strategies."
+          ],
+          "website": [
+              "This website provides comprehensive project planning tools and resources to help you manage your projects efficiently.",
+              "Our website offers project templates, planning guides, budgeting tools, and expert advice to support your project management needs."
+          ],
+          "features": [
+              "Our website features project templates, Gantt charts, resource allocation tools, budget calculators, and team collaboration spaces.",
+              "Key features include customizable project dashboards, progress tracking, automated reporting, and integration with popular productivity tools."
+          ],
+          "pricing": [
+              "We offer flexible pricing plans including Free, Professional ($12/month), and Enterprise (custom pricing). Each plan provides different feature sets and user limits.",
+              "Our pricing structure is designed to grow with your needs. The Free plan is perfect for individuals, while Professional and Enterprise support teams of various sizes."
+          ],
+          "support": [
+              "We provide support through email, live chat during business hours, and comprehensive documentation. Enterprise clients receive dedicated support managers.",
+              "Our support team is available Monday-Friday, 9AM-6PM EST. You can also access our knowledge base and community forums 24/7."
+          ],
+          "templates": [
+              "We offer templates for various project types including software development, marketing campaigns, construction, event planning, and research projects.",
+              "Our template library includes over 50 pre-designed project plans you can customize to your specific needs, saving you valuable planning time."
+          ],
+          "integrations": [
+              "Our platform integrates with popular tools like Slack, Microsoft Teams, Google Workspace, Jira, Asana, Trello, and GitHub.",
+              "You can connect your existing productivity tools to streamline your workflow and avoid duplicating information across platforms."
+          ],
+          "getting_started": [
+              "To get started, create an account, select a project type, choose a template, and customize it to your needs. Our step-by-step wizard will guide you.",
+              "New users can follow our interactive tutorial or schedule a demo with our team to learn how to maximize the platform for your specific needs."
+          ],
+          "default": [
+              "I'd be happy to help with that. Could you provide more details about what you're looking for?",
+              "I'm not sure I understand completely. Could you elaborate on your question?",
+              "That's an interesting question. Let me provide some general information that might help.",
+              "I don't have specific information about that. Would you like me to help you with something else related to project planning?"
+          ]
+      };
+
+      // Suggestions to offer users
+      const suggestions = [
+          "How do I start a new project?",
+          "What features does this website offer?",
+          "Tell me about pricing plans",
+          "How can I create a timeline?",
+          "What project templates are available?",
+          "How to manage project risks?",
+          "Help with resource planning",
+          "Budget planning tips"
+      ];
+
+      // Initial bot message with delay
+      setTimeout(() => {
+          addBotMessage(getRandomResponse("greeting"));
+          showSuggestions();
+          showNotification();
+      }, 1000);
+
+      // Event Listeners
+      chatIcon.addEventListener('click', toggleChat);
+      closeBtn.addEventListener('click', closeChat);
+      sendBtn.addEventListener('click', handleUserMessage);
+      chatInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+              handleUserMessage();
+          }
+      });
+
+      // Functions
+      function toggleChat() {
+          if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
+              chatWindow.style.display = 'flex';
+              chatIcon.classList.remove('new-message');
+              notificationBadge.classList.remove('show');
+              chatInput.focus();
+          } else {
+              closeChat();
+          }
+      }
+
+      function closeChat() {
+          chatWindow.style.display = 'none';
+      }
+
+      function handleUserMessage() {
+          const message = chatInput.value.trim();
+          if (message) {
+              addUserMessage(message);
+              chatInput.value = '';
+              processUserMessage(message);
+          }
+      }
+
+      function addUserMessage(message) {
+          const messageElement = document.createElement('div');
+          messageElement.classList.add('message', 'user-message');
+          messageElement.textContent = message;
+          
+          const timestamp = document.createElement('span');
+          timestamp.classList.add('timestamp');
+          timestamp.textContent = getCurrentTime();
+          messageElement.appendChild(timestamp);
+          
+          chatBody.appendChild(messageElement);
+          scrollToBottom();
+      }
+
+      function addBotMessage(message) {
+          // Create typing indicator
+          const typingIndicator = document.createElement('div');
+          typingIndicator.classList.add('typing-indicator');
+          typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+          chatBody.appendChild(typingIndicator);
+          scrollToBottom();
+          
+          // Simulate typing delay
+          setTimeout(() => {
+              // Remove typing indicator
+              typingIndicator.remove();
+              
+              // Add actual message
+              const messageElement = document.createElement('div');
+              messageElement.classList.add('message', 'bot-message');
+              messageElement.textContent = message;
+              
+              const timestamp = document.createElement('span');
+              timestamp.classList.add('timestamp');
+              timestamp.textContent = getCurrentTime();
+              messageElement.appendChild(timestamp);
+              
+              chatBody.appendChild(messageElement);
+              scrollToBottom();
+              showSuggestions();
+          }, 1500);
+      }
+
+      function processUserMessage(message) {
+          // Simple keyword matching to determine response
+          const lowerMessage = message.toLowerCase();
+          let responseCategory = "default";
+          
+          if (lowerMessage.includes("hello") || lowerMessage.includes("hi") || lowerMessage.includes("hey")) {
+              responseCategory = "greeting";
+          } else if (lowerMessage.includes("plan") || lowerMessage.includes("planning") || lowerMessage.includes("organize")) {
+              responseCategory = "project_planning";
+          } else if (lowerMessage.includes("timeline") || lowerMessage.includes("schedule") || lowerMessage.includes("deadline")) {
+              responseCategory = "timeline";
+          } else if (lowerMessage.includes("resource") || lowerMessage.includes("materials") || lowerMessage.includes("equipment")) {
+              responseCategory = "resources";
+          } else if (lowerMessage.includes("budget") || lowerMessage.includes("cost") || lowerMessage.includes("expense")) {
+              responseCategory = "budget";
+          } else if (lowerMessage.includes("risk") || lowerMessage.includes("issue") || lowerMessage.includes("problem")) {
+              responseCategory = "risks";
+          } else if (lowerMessage.includes("team") || lowerMessage.includes("staff") || lowerMessage.includes("member")) {
+              responseCategory = "team";
+          } else if (lowerMessage.includes("website") || lowerMessage.includes("site") || lowerMessage.includes("platform")) {
+              responseCategory = "website";
+          } else if (lowerMessage.includes("feature") || lowerMessage.includes("function") || lowerMessage.includes("capability")) {
+              responseCategory = "features";
+          } else if (lowerMessage.includes("price") || lowerMessage.includes("pricing") || lowerMessage.includes("cost")) {
+              responseCategory = "pricing";
+          } else if (lowerMessage.includes("support") || lowerMessage.includes("help") || lowerMessage.includes("assistance")) {
+              responseCategory = "support";
+          } else if (lowerMessage.includes("template") || lowerMessage.includes("example") || lowerMessage.includes("sample")) {
+              responseCategory = "templates";
+          } else if (lowerMessage.includes("integrate") || lowerMessage.includes("connection") || lowerMessage.includes("sync")) {
+              responseCategory = "integrations";
+          } else if (lowerMessage.includes("start") || lowerMessage.includes("begin") || lowerMessage.includes("new")) {
+              responseCategory = "getting_started";
+          }
+          
+          const response = getRandomResponse(responseCategory);
+          addBotMessage(response);
+      }
+
+      function getRandomResponse(category) {
+          const responses = knowledgeBase[category] || knowledgeBase["default"];
+          return responses[Math.floor(Math.random() * responses.length)];
+      }
+
+      function showSuggestions() {
+          suggestionsContainer.innerHTML = '';
+          // Shuffle and take 4 random suggestions
+          const shuffled = [...suggestions].sort(() => 0.5 - Math.random());
+          const selected = shuffled.slice(0, 4);
+          
+          selected.forEach(suggestion => {
+              const chip = document.createElement('div');
+              chip.classList.add('suggestion-chip');
+              chip.textContent = suggestion;
+              chip.addEventListener('click', () => {
+                  chatInput.value = suggestion;
+                  handleUserMessage();
+              });
+              suggestionsContainer.appendChild(chip);
+          });
+      }
+
+      function showNotification() {
+          chatIcon.classList.add('new-message');
+          notificationBadge.classList.add('show');
+      }
+
+      function scrollToBottom() {
+          chatBody.scrollTop = chatBody.scrollHeight;
+      }
+
+      function getCurrentTime() {
+          const now = new Date();
+          return now.getHours().toString().padStart(2, '0') + ':' + 
+                 now.getMinutes().toString().padStart(2, '0');
+      }
+  });
+</script>
+</body>
+</html>
+
